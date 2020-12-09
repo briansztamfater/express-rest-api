@@ -5,8 +5,28 @@ const User = require('../models/user');
 
 const app = express();
 
-app.get('/user', (req, res) => {
-  res.json('get user');
+app.get('/user', async (req, res) => {
+  let from = req.query.from || 0;
+  from = Number(from);
+
+  let limit = req.query.limit || 5;
+  limit = Number(limit);
+
+  try {
+    const conditions = { status: true };
+    const users = await User.find(conditions, 'name email role status google').skip(from).limit(limit).exec();
+    const count = await User.count(conditions);
+    res.json({
+      ok: true,
+      users,
+      count
+    });
+  } catch (err) {
+    res.status(400).json({
+      ok: false,
+      err
+    });
+  }
 });
 
 app.post('/user', async (req, res) => {
@@ -50,8 +70,33 @@ app.put('/user/:id', async (req, res) => {
   }
 });
 
-app.delete('/user', (req, res) => {
-  res.json('delete user');
+app.delete('/user/:id', async (req, res, next) => {
+  const id = req.params.id;
+
+  try {
+    const conditions = { _id: id, status: true };
+    const userChanges = { status: false };
+    const deletedUser = await User.findOneAndUpdate(conditions, userChanges, { new: true });
+
+    if (!deletedUser) {
+      res.status(400).json({
+        ok: false,
+        err: {
+          message: 'User not found'
+        }
+      });  
+    }
+
+    res.json({
+      ok: true,
+      user: deletedUser
+    });
+  } catch (err) {
+    res.status(400).json({
+      ok: false,
+      err
+    });
+  }
 });
 
 module.exports = app;
