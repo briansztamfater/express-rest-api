@@ -1,11 +1,13 @@
 const express = require('express');
 const bcrypt = require('bcrypt');
 const _ = require('lodash');
+
 const User = require('../models/user');
+const { verifyToken, verifyAdminRole } = require('../middlewares/authentication');
 
 const app = express();
 
-app.get('/user', async (req, res) => {
+app.get('/user', verifyToken, async (req, res) => {
   let from = req.query.from || 0;
   from = Number(from);
 
@@ -15,7 +17,7 @@ app.get('/user', async (req, res) => {
   try {
     const conditions = { status: true };
     const users = await User.find(conditions, 'name email role status google').skip(from).limit(limit).exec();
-    const count = await User.count(conditions);
+    const count = await User.countDocuments(conditions);
     res.json({
       ok: true,
       users,
@@ -29,7 +31,7 @@ app.get('/user', async (req, res) => {
   }
 });
 
-app.post('/user', async (req, res) => {
+app.post('/user', [verifyToken, verifyAdminRole], async (req, res) => {
   const body = req.body;
   const user = new User({
     name: body.name,
@@ -52,7 +54,7 @@ app.post('/user', async (req, res) => {
   }
 });
 
-app.put('/user/:id', async (req, res) => {
+app.put('/user/:id', [verifyToken, verifyAdminRole], async (req, res) => {
   const id = req.params.id;
   const body = _.pick(req.body, [ 'name', 'email', 'img', 'role' ]);
   
@@ -70,7 +72,7 @@ app.put('/user/:id', async (req, res) => {
   }
 });
 
-app.delete('/user/:id', async (req, res, next) => {
+app.delete('/user/:id', [verifyToken, verifyAdminRole], async (req, res, next) => {
   const id = req.params.id;
 
   try {
