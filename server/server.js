@@ -3,6 +3,7 @@ require('./config/config');
 const express = require('express');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
+const path = require('path');
 
 const routes = require('./routes');
 
@@ -16,6 +17,9 @@ app.use(bodyParser.json());
 
 // Routes global config
 app.use(routes);
+
+// Public global config
+app.use(express.static(path.resolve(__dirname, '../public')));
 
 mongoose.connect(process.env.URL_DB, { useUnifiedTopology: true, useCreateIndex: true, useNewUrlParser: true }, (err) => {
   if (err) throw err;
