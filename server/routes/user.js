@@ -18,13 +18,13 @@ app.get('/user', verifyToken, async (req, res) => {
     const conditions = { status: true };
     const users = await User.find(conditions, 'name email role status google').skip(from).limit(limit).exec();
     const count = await User.countDocuments(conditions);
-    res.json({
+    return res.json({
       ok: true,
       users,
       count
     });
   } catch (err) {
-    res.status(400).json({
+    return res.status(400).json({
       ok: false,
       err
     });
@@ -42,12 +42,12 @@ app.post('/user', [verifyToken, verifyAdminRole], async (req, res) => {
 
   try {
     const userDB = await user.save();
-    res.json({
+    return res.json({
       ok: true,
       user: userDB
     });
   } catch (err) {
-    res.status(400).json({
+    return res.status(400).json({
       ok: false,
       err
     });
@@ -60,12 +60,12 @@ app.put('/user/:id', [verifyToken, verifyAdminRole], async (req, res) => {
   
   try {
     const userDB = await User.findByIdAndUpdate(id, body, { new: true, runValidators: true });
-    res.json({
+    return res.json({
       ok: true,
       userDB
     });
   } catch (err) {
-    res.status(400).json({
+    return res.status(400).json({
       ok: false,
       err
     });
@@ -81,7 +81,7 @@ app.delete('/user/:id', [verifyToken, verifyAdminRole], async (req, res, next) =
     const deletedUser = await User.findOneAndUpdate(conditions, userChanges, { new: true });
 
     if (!deletedUser) {
-      res.status(400).json({
+      return res.status(400).json({
         ok: false,
         err: {
           message: 'User not found'
@@ -89,12 +89,12 @@ app.delete('/user/:id', [verifyToken, verifyAdminRole], async (req, res, next) =
       });  
     }
 
-    res.json({
+    return res.json({
       ok: true,
       user: deletedUser
     });
   } catch (err) {
-    res.status(400).json({
+    return res.status(400).json({
       ok: false,
       err
     });
