@@ -21,7 +21,7 @@ app.use(routes);
 // Public global config
 app.use(express.static(path.resolve(__dirname, '../public')));
 
-mongoose.connect(process.env.URL_DB, { useUnifiedTopology: true, useCreateIndex: true, useNewUrlParser: true }, (err) => {
+mongoose.connect(process.env.URL_DB, { useUnifiedTopology: true, useCreateIndex: true, useNewUrlParser: true, useFindAndModify: false }, (err) => {
   if (err) throw err;
 
   console.log('Database is ONLINE');

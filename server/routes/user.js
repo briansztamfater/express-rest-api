@@ -59,10 +59,10 @@ app.put('/user/:id', [verifyToken, verifyAdminRole], async (req, res) => {
   const body = _.pick(req.body, [ 'name', 'email', 'img', 'role' ]);
   
   try {
-    const userDB = await User.findByIdAndUpdate(id, body, { new: true, runValidators: true });
+    const userDB = await User.findByIdAndUpdate(id, body, { new: true, runValidators: true, context: 'query' });
     return res.json({
       ok: true,
-      userDB
+      user: userDB
     });
   } catch (err) {
     return res.status(400).json({
