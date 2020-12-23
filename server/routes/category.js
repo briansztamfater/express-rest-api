@@ -9,7 +9,7 @@ let Category = require('../models/category');
 
 app.get('/category', verifyToken, async (req, res) => {
   try {
-    const categories = await Category.find().populate('user').exec();
+    const categories = await Category.find().collation({ locale: "en" }).sort('description').populate('user', 'name email').exec();
     const count = await Category.countDocuments();
     return res.json({
       ok: true,
@@ -27,7 +27,7 @@ app.get('/category', verifyToken, async (req, res) => {
 app.get('/category/:id', verifyToken, async (req, res) => {
   const id = req.params.id;
   try {
-    const category = await Category.findById(id).populate('user').exec();
+    const category = await Category.findById(id).populate('user', 'name email').exec();
     return res.json({
       ok: true,
       category,
@@ -46,7 +46,7 @@ app.post('/category', verifyToken, async (req, res) => {
   try {
     const category = new Category({
       description,
-      user
+      user: user._id
     });
     const categoryDb = await category.save({ new: true });
     await Category.populate(categoryDb, { path: 'user' });
